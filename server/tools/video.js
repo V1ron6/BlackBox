@@ -8,6 +8,7 @@ const PUBLIC_URL = /^https?:\/\/(?!(localhost|127\.|10\.|192\.168\.|169\.254\.|0
 
 export default {
   id: 'video',
+  heavy: true,
   timeout: 300_000,
   check: () => new Promise((r) => execFile('yt-dlp', ['--version'], (e) => r(e ? 'yt-dlp is not installed on the server' : true))),
   run(req, res) {

@@ -1,0 +1,20 @@
+# Render Blueprint: backend only, free plan. Host the client on any free static host.
+services:
+  - type: web
+    name: blackbox-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    healthCheckPath: /healthz
+    envVars:
+      - key: ADMIN_KEY
+        generateValue: true
+      - key: ALLOWED_ORIGIN      # your client URL, e.g. https://blackbox.vercel.app
+        sync: false
+      - key: MAX_UPLOAD_MB
+        value: "25"
+      - key: MAX_HEAVY_JOBS
+        value: "1"
+      - key: MAX_MEDIA_SECONDS
+        value: "300"

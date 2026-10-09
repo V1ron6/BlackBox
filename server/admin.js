@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { listTools, disabled, stats } from './registry.js';
+import { listTools, disabled, stats, jobs } from './registry.js';
 
 export const adminRouter = Router();
 
@@ -10,7 +10,7 @@ adminRouter.use((req, res, next) => {
   next();
 });
 adminRouter.get('/status', async (_q, r) =>
-  r.json({ tools: await listTools(), stats, uptime: Math.round(process.uptime()) }));
+  r.json({ tools: await listTools(), stats, jobs: jobs.slice(0, 50), disabled: [...disabled], uptime: Math.round(process.uptime()) }));
 adminRouter.post('/toggle/:id', (req, res) => {
   const id = req.params.id;
   disabled.has(id) ? disabled.delete(id) : disabled.add(id);

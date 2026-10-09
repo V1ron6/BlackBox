@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Loader2, Download, AlertTriangle } from 'lucide-react';
+import { API } from '../lib/api.js';
 
 export default function ServerTool({ tool, status, down }) {
   const [busy, setBusy] = useState(false);
@@ -13,7 +14,7 @@ export default function ServerTool({ tool, status, down }) {
     e.preventDefault();
     setBusy(true); setError(''); setLinks([]);
     try {
-      const r = await fetch(`/api/tools/${tool.id}/run`, { method: 'POST', body: new FormData(e.target) });
+      const r = await fetch(`${API}/api/tools/${tool.id}/run`, { method: 'POST', body: new FormData(e.target) });
       const type = r.headers.get('content-type') || '';
       if (type.includes('json')) {
         const j = await r.json();
@@ -38,7 +39,7 @@ export default function ServerTool({ tool, status, down }) {
         <label key={f.name}>{f.label}
           {f.options
             ? <select name={f.name}>{f.options.map((o) => <option key={o}>{o}</option>)}</select>
-            : <input name={f.name} required />}
+            : <input name={f.name} required={!f.optional} />}
         </label>
       ))}
       {tool.accept && <label>Files<input type="file" name="files" accept={tool.accept} multiple={tool.multiple} required /></label>}

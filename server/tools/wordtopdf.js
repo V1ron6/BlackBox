@@ -1,28 +1,25 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
-import { execFile } from 'child_process';
+import { has, tmp, clean, soffice, send, baseName } from '../lib/util.js';
 
-const soffice = (args) =>
-  new Promise((ok, no) => execFile('soffice', args, { timeout: 90_000 }, (e, out) => (e ? no(e) : ok(out))));
+const OK = /\.(docx?|odt|rtf|txt|xlsx?|ods|csv|pptx?|odp)$/i;
 
 export default {
   id: 'word-to-pdf',
-  timeout: 100_000,
-  check: () => new Promise((r) => execFile('soffice', ['--version'], (e) => r(e ? 'LibreOffice (soffice) is not installed on the server' : true))),
+  heavy: true,
+  timeout: 110_000,
+  check: () => has('soffice'),
   async run(req, res, files) {
     const f = files[0];
-    if (!f || !/\.(docx?|odt|rtf|txt)$/i.test(f.originalname)) throw new Error('Upload a .doc, .docx, .odt, .rtf or .txt file');
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-'));
+    if (!f || !OK.test(f.originalname)) throw new Error('Upload a Word, Excel, PowerPoint, ODF, RTF, CSV or TXT file');
+    const d = tmp();
     try {
-      const src = path.join(dir, 'in' + path.extname(f.originalname).toLowerCase());
+      const src = path.join(d, 'in' + path.extname(f.originalname).toLowerCase());
       fs.copyFileSync(f.path, src);
-      await soffice(['--headless', '--convert-to', 'pdf', '--outdir', dir, src]);
-      const pdf = path.join(dir, 'in.pdf');
+      await soffice(d, ['--convert-to', 'pdf', '--outdir', d, src]);
+      const pdf = path.join(d, 'in.pdf');
       if (!fs.existsSync(pdf)) throw new Error('Conversion failed');
-      await new Promise((done) => res.download(pdf, f.originalname.replace(/\.[^.]+$/, '') + '.pdf', done));
-    } finally {
-      fs.rm(dir, { recursive: true, force: true }, () => {});
-    }
+      await send(res, pdf, baseName(f) + '.pdf');
+    } finally { clean(d); }
   },
 };

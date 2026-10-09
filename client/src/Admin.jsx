@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Power, RefreshCw } from 'lucide-react';
+import { API } from './lib/api.js';
 
 export default function Admin() {
   const [key, setKey] = useState(sessionStorage.getItem('bbk') || '');
@@ -9,13 +10,13 @@ export default function Admin() {
 
   async function load() {
     try {
-      const r = await fetch('/api/admin/status', { headers });
+      const r = await fetch(`${API}/api/admin/status`, { headers });
       if (!r.ok) throw new Error('Denied');
       sessionStorage.setItem('bbk', key);
       setData(await r.json()); setError('');
     } catch (e) { setData(null); setError(e.message); }
   }
-  async function toggle(id) { await fetch(`/api/admin/toggle/${id}`, { method: 'POST', headers }); load(); }
+  async function toggle(id) { await fetch(`${API}/api/admin/toggle/${id}`, { method: 'POST', headers }); load(); }
 
   return (
     <div className="page">
@@ -28,6 +29,7 @@ export default function Admin() {
       {data && (
         <>
           <small>Uptime {data.uptime}s</small>
+          <h3>Tools</h3>
           <ul className="links">
             {data.tools.map((t) => (
               <li key={t.id} className="row">
@@ -36,6 +38,13 @@ export default function Admin() {
               </li>
             ))}
           </ul>
+          <h3>Recent jobs</h3>
+          <table className="table">
+            <thead><tr><th>Time</th><th>Tool</th><th>ms</th><th>Result</th></tr></thead>
+            <tbody>
+              {data.jobs.map((j, i) => <tr key={i}><td>{j.at.slice(11, 19)}</td><td>{j.id}</td><td>{j.ms}</td><td>{j.ok ? 'ok' : j.error}</td></tr>)}
+            </tbody>
+          </table>
         </>
       )}
     </div>
