@@ -2,11 +2,14 @@ FROM node:22-slim
 
 # Everything the tools shell out to. Trimmed LibreOffice (no Base/Draw/Math) to keep the image smaller.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl ffmpeg ghostscript qpdf poppler-utils \
+      ca-certificates curl ffmpeg python3 python3-pip ghostscript qpdf poppler-utils \
       tesseract-ocr tesseract-ocr-eng \
       libreoffice-writer libreoffice-calc libreoffice-impress \
       fonts-liberation fonts-dejavu-core \
  && rm -rf /var/lib/apt/lists/*
+
+# spotdl (Spotify Downloader) needs Python
+RUN pip3 install --no-cache-dir --break-system-packages spotdl
 
 # Standalone yt-dlp binary (no Python needed); it self-updates on every start
 RUN curl -fsSL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /usr/local/bin/yt-dlp \

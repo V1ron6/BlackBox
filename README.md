@@ -39,7 +39,7 @@ Open `/<VITE_ADMIN_PATH>` and enter `ADMIN_KEY`. Shows tool health, run/error co
 - Client: every tool is a lazy chunk inside an error boundary. Browser tools work even when the server is asleep or down.
 
 ## Programs the server tools call (all installed by the Dockerfile)
-libreoffice (Office to PDF, PDF to Word, Markdown and Word), ghostscript (Compress PDF), qpdf (Protect/Unlock), poppler-utils (PDF to Images, PDF OCR), tesseract (OCR), ffmpeg (audio/video tools), yt-dlp (Video Downloader).
+libreoffice (Office to PDF, PDF to Word, Markdown and Word), ghostscript (Compress PDF), qpdf (Protect/Unlock), poppler-utils (PDF to Images, PDF OCR), tesseract (OCR), ffmpeg (audio/video tools), yt-dlp (Video Downloader), spotdl + Python (Spotify Downloader).
 
 ## Add a tool
 - Browser tool: component in `client/src/tools/`, register in `tools/index.js`, entry in `data.js`, icon in `icons.js`.
@@ -47,6 +47,8 @@ libreoffice (Office to PDF, PDF to Word, Markdown and Word), ghostscript (Compre
 
 ## Notes
 - Downloading videos or podcasts may breach the source site's terms, and big sites such as YouTube often block datacenter IPs, so expect the video tool to fail there. Use only for content you may save.
+- Spotify Downloader uses spotdl, which fetches matching audio from YouTube Music, so it hits the same IP blocking as the video tool and shares Spotify API rate limits. Albums/playlists are zipped and capped by `SPOTIFY_MAX_TRACKS` (default 25); on the free plan large ones will time out and return only the finished tracks.
+- Optional env for the video tool: `YTDLP_COOKIES` (path to a Netscape cookies file), `YTDLP_PROXY`, `DL_MAX_SIZE` (default 300M).
 - The URL guard blocks obvious private addresses only. Add DNS-level checks before exposing the downloaders publicly.
 - Generated PDFs use standard fonts, so non-Latin characters print as `?`.
 - Background Remover and Passport Photo's white background use @imgly/background-removal (AGPL-3.0 for open-source use; see its license if you ever make this commercial).
